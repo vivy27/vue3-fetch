@@ -1,6 +1,6 @@
 {
   "name": "vue3-fetch",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "",
   "main": "dist/vue3-fetch.ssr.js",
   "browser": "dist/vue3-fetch.esm.js",
