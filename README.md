@@ -65,6 +65,8 @@ export default {
       ref="fetchref"
       fetchId="get-users"
       url="https://vj-simple-crud.herokuapp.com/users"
+      @fetch-success="onSuccess" 
+      @fetch-error="onError"
     >
         <template #default="{ isLoading, data, error }">
             <div v-if="isLoading">Loading...</div>
