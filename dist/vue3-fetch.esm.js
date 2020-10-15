@@ -1,17 +1,19 @@
 import { ref, onMounted, computed, watch, openBlock, createBlock, renderSlot } from 'vue';
 
-function useFetch(url, options) {
+function useFetch(url, options, stub = {}) {
   const isLoading = ref(false);
   const isSuccess = ref(false);
   const isError = ref(false);
   const data = ref(null);
   const error = ref(null);
 
+  const stubExits = () => Object.keys(stub).length > 0;
+
   const execute = async () => {
     isLoading.value = true;
 
     try {
-      data.value = await fetch(url, options).then(res => res.json());
+      data.value = stubExits() ? stub : await fetch(url, options).then(res => res.json());
       isSuccess.value = true;
       isError.value = false;
     } catch (e) {
@@ -41,7 +43,7 @@ function useFetch(url, options) {
 var script = {
   name: "vue3-fetch",
   props: {
-    id: String,
+    fetchId: String,
     url: {
       type: String,
       required: true
@@ -81,15 +83,11 @@ var script = {
     integrity: String,
     keepAlive: Boolean,
     signal: [String, Number, Boolean, Array, Object, Function, Promise],
-    stub: Object,
-    save: {
-      type: Boolean,
-      default: false
-    }
+    stub: [Array, Object]
   },
 
   setup({
-    id,
+    fetchId,
     url,
     params,
     method,
@@ -104,7 +102,7 @@ var script = {
     integrity,
     keepAlive,
     signal,
-    save
+    stub
   }, {
     emit
   }) {
@@ -153,8 +151,8 @@ var script = {
       data,
       error,
       execute
-    } = useFetch(endpoint, fetchOptions);
-    const moduleName = computed(() => id || url.toString().replace(/\//g, "-"));
+    } = useFetch(endpoint, fetchOptions, stub);
+    const moduleName = computed(() => fetchId || url.toString().replace(/\//g, "-"));
     watch([data, error], ([_isSuccess, _isError]) => {
       _isSuccess && emit("fetch-success");
       _isError && emit("fetch-error");
@@ -174,10 +172,11 @@ var script = {
 
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (openBlock(), createBlock("div", {
+    id: $props.fetchId,
     class: ["vue-fetch", {'is-stubbed': !!$props.stub}]
   }, [
     renderSlot(_ctx.$slots, "default", { isLoading: $setup.isLoading, isSuccess: $setup.isSuccess, isError: $setup.isError, data: $setup.data, error: $setup.error })
-  ], 2))
+  ], 10, ["id"]))
 }
 
 script.render = render;

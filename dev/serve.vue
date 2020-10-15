@@ -14,9 +14,8 @@ export default {
   <div id="app">
     <vue3-fetch
       ref="fetchref"
-      id="get-users"
+      fetchId="v3-fetch"
       url="https://vj-simple-crud.herokuapp.com/users"
-      :stub="{}"
     >
       <template #default="{ isLoading, data }">
         <div v-if="isLoading">Loading...</div>

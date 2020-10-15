@@ -138,11 +138,16 @@ function _arrayLikeToArray(arr, len) {
 function _nonIterableRest() {
   throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
 }function useFetch(url, options) {
+  var stub = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
   var isLoading = vue.ref(false);
   var isSuccess = vue.ref(false);
   var isError = vue.ref(false);
   var data = vue.ref(null);
   var error = vue.ref(null);
+
+  var stubExits = function stubExits() {
+    return Object.keys(stub).length > 0;
+  };
 
   var execute = /*#__PURE__*/function () {
     var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
@@ -152,36 +157,50 @@ function _nonIterableRest() {
             case 0:
               isLoading.value = true;
               _context.prev = 1;
-              _context.next = 4;
+
+              if (!stubExits()) {
+                _context.next = 6;
+                break;
+              }
+
+              _context.t0 = stub;
+              _context.next = 9;
+              break;
+
+            case 6:
+              _context.next = 8;
               return fetch(url, options).then(function (res) {
                 return res.json();
               });
 
-            case 4:
-              data.value = _context.sent;
-              isSuccess.value = true;
-              isError.value = false;
-              _context.next = 14;
-              break;
+            case 8:
+              _context.t0 = _context.sent;
 
             case 9:
-              _context.prev = 9;
-              _context.t0 = _context["catch"](1);
-              error.value = _context.t0;
-              isSuccess.value = false;
-              isError.value = true;
+              data.value = _context.t0;
+              isSuccess.value = true;
+              isError.value = false;
+              _context.next = 19;
+              break;
 
             case 14:
               _context.prev = 14;
-              isLoading.value = false;
-              return _context.finish(14);
+              _context.t1 = _context["catch"](1);
+              error.value = _context.t1;
+              isSuccess.value = false;
+              isError.value = true;
 
-            case 17:
+            case 19:
+              _context.prev = 19;
+              isLoading.value = false;
+              return _context.finish(19);
+
+            case 22:
             case "end":
               return _context.stop();
           }
         }
-      }, _callee, null, [[1, 9, 14, 17]]);
+      }, _callee, null, [[1, 14, 19, 22]]);
     }));
 
     return function execute() {
@@ -205,7 +224,7 @@ function _nonIterableRest() {
 }var script = {
   name: "vue3-fetch",
   props: {
-    id: String,
+    fetchId: String,
     url: {
       type: String,
       required: true
@@ -257,14 +276,10 @@ function _nonIterableRest() {
     integrity: String,
     keepAlive: Boolean,
     signal: [String, Number, Boolean, Array, Object, Function, Promise],
-    stub: Object,
-    save: {
-      type: Boolean,
-      default: false
-    }
+    stub: [Array, Object]
   },
   setup: function setup(_ref, _ref2) {
-    var id = _ref.id,
+    var fetchId = _ref.fetchId,
         url = _ref.url,
         params = _ref.params,
         method = _ref.method,
@@ -279,7 +294,7 @@ function _nonIterableRest() {
         integrity = _ref.integrity,
         keepAlive = _ref.keepAlive,
         signal = _ref.signal,
-        save = _ref.save;
+        stub = _ref.stub;
     var emit = _ref2.emit;
 
     var fetchOptions = _objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2({
@@ -313,7 +328,7 @@ function _nonIterableRest() {
     }).join("&");
     var endpoint = params ? "".concat(url, "?").concat(qs) : url;
 
-    var _useFetch = useFetch(endpoint, fetchOptions),
+    var _useFetch = useFetch(endpoint, fetchOptions, stub),
         isLoading = _useFetch.isLoading,
         isSuccess = _useFetch.isSuccess,
         isError = _useFetch.isError,
@@ -322,7 +337,7 @@ function _nonIterableRest() {
         execute = _useFetch.execute;
 
     var moduleName = vue.computed(function () {
-      return id || url.toString().replace(/\//g, "-");
+      return fetchId || url.toString().replace(/\//g, "-");
     });
     vue.watch([data, error], function (_ref3) {
       var _ref4 = _slicedToArray(_ref3, 2),
@@ -346,10 +361,11 @@ function _nonIterableRest() {
   }
 };function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (vue.openBlock(), vue.createBlock("div", {
+    id: $props.fetchId,
     class: ["vue-fetch", {'is-stubbed': !!$props.stub}]
   }, [
     vue.renderSlot(_ctx.$slots, "default", { isLoading: $setup.isLoading, isSuccess: $setup.isSuccess, isError: $setup.isError, data: $setup.data, error: $setup.error })
-  ], 2))
+  ], 10, ["id"]))
 }script.render = render;/* eslint-disable import/prefer-default-export */var components=/*#__PURE__*/Object.freeze({__proto__:null,Vue3Fetch: script});var install = function installVue3Fetch(Vue) {
   if (install.installed) return;
   install.installed = true;

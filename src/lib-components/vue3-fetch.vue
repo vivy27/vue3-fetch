@@ -1,5 +1,5 @@
 <template>
-  <div class="vue-fetch" :class="{'is-stubbed': !!stub}">
+  <div :id="fetchId" class="vue-fetch" :class="{'is-stubbed': !!stub}">
     <slot v-bind="{ isLoading, isSuccess, isError, data, error }" />
   </div>
 </template>
@@ -11,7 +11,7 @@ import useFetch from "../hooks/useFetch";
 export default {
   name: "vue3-fetch",
   props: {
-    id: String,
+    fetchId: String,
     url: {
       type: String,
       required: true,
@@ -69,15 +69,11 @@ export default {
     integrity: String,
     keepAlive: Boolean,
     signal: [String, Number, Boolean, Array, Object, Function, Promise],
-    stub: Object,
-    save: {
-      type: Boolean,
-      default: false,
-    },
+    stub: [Array, Object],
   },
   setup(
     {
-      id,
+      fetchId,
       url,
       params,
       method,
@@ -92,7 +88,7 @@ export default {
       integrity,
       keepAlive,
       signal,
-      save,
+      stub,
     },
     { emit }
   ) {
@@ -118,9 +114,10 @@ export default {
     const endpoint = params ? `${url}?${qs}` : url;
     const { isLoading, isSuccess, isError, data, error, execute } = useFetch(
       endpoint,
-      fetchOptions
+      fetchOptions,
+      stub
     );
-    const moduleName = computed(() => id || url.toString().replace(/\//g, "-"));
+    const moduleName = computed(() => fetchId || url.toString().replace(/\//g, "-"));
 
     watch([data, error], ([_isSuccess, _isError]) => {
       _isSuccess && emit("fetch-success");

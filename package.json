@@ -1,7 +1,8 @@
 {
   "name": "vue3-fetch",
-  "version": "2.0.1",
-  "description": "",
+  "version": "2.0.2",
+  "description": "A vue3 fetch component for xhr requests",
+  "author": "Vivian Joseph<vivy27@gmail.com>",
   "main": "dist/vue3-fetch.ssr.js",
   "browser": "dist/vue3-fetch.esm.js",
   "module": "dist/vue3-fetch.esm.js",
@@ -9,6 +10,17 @@
   "files": [
     "dist/*",
     "src/**/*.vue"
+  ],
+  "keywords": [
+    "vue",
+    "fetch",
+    "vue-fetch",
+    "v3-fetch",
+    "vue3-fetch",
+    "axios",
+    "javascript fetch",
+    "fetch api",
+    "REST in vue template"
   ],
   "scripts": {
     "serve": "vue-cli-service serve dev/serve.js",
