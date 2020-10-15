@@ -42,7 +42,7 @@ export default {
 <template>
   <vue3-fetch
       ref="fetchref"
-      id="get-users"
+      fetchId="get-users"
       url="https://vj-simple-crud.herokuapp.com/users"
     >
         <template #default="{ isLoading, data }">
@@ -63,7 +63,7 @@ export default {
 <template>
   <vue3-fetch
       ref="fetchref"
-      id="get-users"
+      fetchId="get-users"
       url="https://vj-simple-crud.herokuapp.com/users"
     >
         <template #default="{ isLoading, data, error }">
