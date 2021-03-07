@@ -1,23 +1,68 @@
-import { ref, onMounted } from "vue";
+import { ref, reactive, onMounted } from "vue";
 
-export default function useFetch(url, options, stub = {}) {
+export default function useFetch({
+    url,
+    method,
+    query,
+    body,
+    headers,
+    referrer,
+    referrerPolicy,
+    mode,
+    credentials,
+    cache,
+    redirect,
+    integrity,
+    keepAlive,
+    signal,
+    stub
+}) {
     const isLoading = ref(false);
     const isSuccess = ref(false);
     const isError = ref(false);
-    const data = ref(null);
-    const error = ref(null);
-    const stubExits = () => Object.keys(stub).length > 0;
+    const response = reactive({
+        data: null,
+        error: null,
+    });
 
-    const execute = async () => {
+    const endpoint = (query) => {
+        const qs = new URLSearchParams(query).toString();
+        return qs ? `${url}?${qs}` : url;
+    };
+
+    const fetchOptions = {
+        method,
+        ...(body && { body }),
+        ...(headers && { headers }),
+        ...(referrer && { referrer }),
+        ...(referrerPolicy && { referrerPolicy }),
+        ...(mode && { mode }),
+        ...(credentials && { credentials }),
+        ...(cache && { cache }),
+        ...(redirect && { redirect }),
+        ...(integrity && { integrity }),
+        ...(keepAlive && { keepAlive }),
+        ...(signal && { signal }),
+    };
+
+    const execute = async ({ query, body } = {}) => {
+        isSuccess.value = null;
+        isError.value = null;
+
         isLoading.value = true;
 
+        const options = {
+            ...fetchOptions,
+            ...(body && { body: JSON.stringify(body) }),
+        }
+
         try {
-            data.value = stubExits() ? stub : await fetch(url, options).then(res => res.json());
+            response.data = stub || await fetch(endpoint(query), options).then(res => res.json());
             isSuccess.value = true;
             isError.value = false;
         }
         catch (e) {
-            error.value = e;
+            response.error = e.message;
             isSuccess.value = false;
             isError.value = true;
         }
@@ -27,8 +72,8 @@ export default function useFetch(url, options, stub = {}) {
     }
 
     onMounted(() => {
-        if (options.method === 'get') {
-            execute();
+        if (method === 'get') {
+            execute({ query, body });
         }
     });
 
@@ -36,8 +81,7 @@ export default function useFetch(url, options, stub = {}) {
         isLoading,
         isSuccess,
         isError,
-        data,
-        error,
+        response,
         execute
     }
 }

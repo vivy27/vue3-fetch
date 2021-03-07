@@ -137,88 +137,141 @@ function _arrayLikeToArray(arr, len) {
 
 function _nonIterableRest() {
   throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-}function useFetch(url, options) {
-  var stub = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+}function useFetch(_ref) {
+  var url = _ref.url,
+      method = _ref.method,
+      query = _ref.query,
+      body = _ref.body,
+      headers = _ref.headers,
+      referrer = _ref.referrer,
+      referrerPolicy = _ref.referrerPolicy,
+      mode = _ref.mode,
+      credentials = _ref.credentials,
+      cache = _ref.cache,
+      redirect = _ref.redirect,
+      integrity = _ref.integrity,
+      keepAlive = _ref.keepAlive,
+      signal = _ref.signal,
+      stub = _ref.stub;
   var isLoading = vue.ref(false);
   var isSuccess = vue.ref(false);
   var isError = vue.ref(false);
-  var data = vue.ref(null);
-  var error = vue.ref(null);
+  var response = vue.reactive({
+    data: null,
+    error: null
+  });
 
-  var stubExits = function stubExits() {
-    return Object.keys(stub).length > 0;
+  var endpoint = function endpoint(query) {
+    var qs = new URLSearchParams(query).toString();
+    return qs ? "".concat(url, "?").concat(qs) : url;
   };
 
+  var fetchOptions = _objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2({
+    method: method
+  }, body && {
+    body: body
+  }), headers && {
+    headers: headers
+  }), referrer && {
+    referrer: referrer
+  }), referrerPolicy && {
+    referrerPolicy: referrerPolicy
+  }), mode && {
+    mode: mode
+  }), credentials && {
+    credentials: credentials
+  }), cache && {
+    cache: cache
+  }), redirect && {
+    redirect: redirect
+  }), integrity && {
+    integrity: integrity
+  }), keepAlive && {
+    keepAlive: keepAlive
+  }), signal && {
+    signal: signal
+  });
+
   var execute = /*#__PURE__*/function () {
-    var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+    var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+      var _ref3,
+          query,
+          body,
+          options,
+          _args = arguments;
+
       return regeneratorRuntime.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
+              _ref3 = _args.length > 0 && _args[0] !== undefined ? _args[0] : {}, query = _ref3.query, body = _ref3.body;
+              isSuccess.value = null;
+              isError.value = null;
               isLoading.value = true;
-              _context.prev = 1;
+              options = _objectSpread2(_objectSpread2({}, fetchOptions), body && {
+                body: JSON.stringify(body)
+              });
+              _context.prev = 5;
+              _context.t0 = stub;
 
-              if (!stubExits()) {
-                _context.next = 6;
+              if (_context.t0) {
+                _context.next = 11;
                 break;
               }
 
-              _context.t0 = stub;
-              _context.next = 9;
-              break;
-
-            case 6:
-              _context.next = 8;
-              return fetch(url, options).then(function (res) {
+              _context.next = 10;
+              return fetch(endpoint(query), options).then(function (res) {
                 return res.json();
               });
 
-            case 8:
+            case 10:
               _context.t0 = _context.sent;
 
-            case 9:
-              data.value = _context.t0;
+            case 11:
+              response.data = _context.t0;
               isSuccess.value = true;
               isError.value = false;
-              _context.next = 19;
+              _context.next = 21;
               break;
 
-            case 14:
-              _context.prev = 14;
-              _context.t1 = _context["catch"](1);
-              error.value = _context.t1;
+            case 16:
+              _context.prev = 16;
+              _context.t1 = _context["catch"](5);
+              response.error = _context.t1.message;
               isSuccess.value = false;
               isError.value = true;
 
-            case 19:
-              _context.prev = 19;
+            case 21:
+              _context.prev = 21;
               isLoading.value = false;
-              return _context.finish(19);
+              return _context.finish(21);
 
-            case 22:
+            case 24:
             case "end":
               return _context.stop();
           }
         }
-      }, _callee, null, [[1, 14, 19, 22]]);
+      }, _callee, null, [[5, 16, 21, 24]]);
     }));
 
     return function execute() {
-      return _ref.apply(this, arguments);
+      return _ref2.apply(this, arguments);
     };
   }();
 
   vue.onMounted(function () {
-    if (options.method === 'get') {
-      execute();
+    if (method === 'get') {
+      execute({
+        query: query,
+        body: body
+      });
     }
   });
   return {
     isLoading: isLoading,
     isSuccess: isSuccess,
     isError: isError,
-    data: data,
-    error: error,
+    response: response,
     execute: execute
   };
 }var script = {
@@ -229,10 +282,6 @@ function _nonIterableRest() {
       type: String,
       required: true
     },
-    params: {
-      type: Object,
-      default: function _default() {}
-    },
     method: {
       type: String,
       validator: function validator(value) {
@@ -240,8 +289,23 @@ function _nonIterableRest() {
       },
       default: "get"
     },
-    headers: Object,
-    payload: Object,
+    query: {
+      type: Object,
+      default: function _default() {
+        return {};
+      }
+    },
+    body: {
+      type: [Object, Array]
+    },
+    headers: {
+      type: Object,
+      default: function _default() {
+        return {
+          "Content-Type": "application/json"
+        };
+      }
+    },
     referrer: String,
     referrerPolicy: {
       type: String,
@@ -278,93 +342,59 @@ function _nonIterableRest() {
     signal: [String, Number, Boolean, Array, Object, Function, Promise],
     stub: [Array, Object]
   },
-  setup: function setup(_ref, _ref2) {
-    var fetchId = _ref.fetchId,
-        url = _ref.url,
-        params = _ref.params,
-        method = _ref.method,
-        headers = _ref.headers,
-        payload = _ref.payload,
-        referrer = _ref.referrer,
-        referrerPolicy = _ref.referrerPolicy,
-        mode = _ref.mode,
-        credentials = _ref.credentials,
-        cache = _ref.cache,
-        redirect = _ref.redirect,
-        integrity = _ref.integrity,
-        keepAlive = _ref.keepAlive,
-        signal = _ref.signal,
-        stub = _ref.stub;
-    var emit = _ref2.emit;
+  setup: function setup(props, _ref) {
+    var emit = _ref.emit;
 
-    var fetchOptions = _objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2({
-      method: method
-    }, headers && {
-      headers: headers
-    }), payload && {
-      body: payload
-    }), referrer && {
-      referrer: referrer
-    }), referrerPolicy && {
-      referrerPolicy: referrerPolicy
-    }), mode && {
-      mode: mode
-    }), credentials && {
-      credentials: credentials
-    }), cache && {
-      cache: cache
-    }), redirect && {
-      redirect: redirect
-    }), integrity && {
-      integrity: integrity
-    }), keepAlive && {
-      keepAlive: keepAlive
-    }), signal && {
-      signal: signal
-    });
+    var fetchOptions = _objectSpread2({}, props);
 
-    var qs = params && Object.keys(params).map(function (key) {
-      return key + "=" + params[key];
-    }).join("&");
-    var endpoint = params ? "".concat(url, "?").concat(qs) : url;
-
-    var _useFetch = useFetch(endpoint, fetchOptions, stub),
+    var _useFetch = useFetch(fetchOptions),
         isLoading = _useFetch.isLoading,
         isSuccess = _useFetch.isSuccess,
         isError = _useFetch.isError,
-        data = _useFetch.data,
-        error = _useFetch.error,
+        response = _useFetch.response,
         execute = _useFetch.execute;
 
-    var moduleName = vue.computed(function () {
-      return fetchId || url.toString().replace(/\//g, "-");
-    });
-    vue.watch([data, error], function (_ref3) {
-      var _ref4 = _slicedToArray(_ref3, 2),
-          _isSuccess = _ref4[0],
-          _isError = _ref4[1];
+    vue.watch([isSuccess, isError], function (_ref2) {
+      var _ref3 = _slicedToArray(_ref2, 2),
+          success = _ref3[0],
+          error = _ref3[1];
 
-      _isSuccess && emit("fetch-success");
-      _isError && emit("fetch-error");
+      if (success) emit("fetch-success", response.data);
+      if (error) emit("fetch-error", response.error);
     });
     vue.watch(function () {
-      return fetchOptions;
-    }, execute);
+      return [props.query, props.body];
+    }, function (_ref4) {
+      var _ref5 = _slicedToArray(_ref4, 2),
+          query = _ref5[0],
+          body = _ref5[1];
+
+      execute(_objectSpread2(_objectSpread2({}, query && {
+        query: query
+      }), body && {
+        body: body
+      }));
+    });
     return {
       isLoading: isLoading,
       isSuccess: isSuccess,
       isError: isError,
-      data: data,
-      error: error,
+      response: response,
       execute: execute
     };
   }
 };function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (vue.openBlock(), vue.createBlock("div", {
     id: $props.fetchId,
-    class: ["vue-fetch", {'is-stubbed': !!$props.stub}]
+    class: ["vue-fetch", { 'is-stubbed': !!$props.stub }]
   }, [
-    vue.renderSlot(_ctx.$slots, "default", { isLoading: $setup.isLoading, isSuccess: $setup.isSuccess, isError: $setup.isError, data: $setup.data, error: $setup.error })
+    vue.renderSlot(_ctx.$slots, "default", {
+        isLoading: $setup.isLoading,
+        isSuccess: $setup.isSuccess,
+        isError: $setup.isError,
+        data: $setup.response.data,
+        error: $setup.response.error,
+      })
   ], 10, ["id"]))
 }script.render = render;/* eslint-disable import/prefer-default-export */var components=/*#__PURE__*/Object.freeze({__proto__:null,Vue3Fetch: script});var install = function installVue3Fetch(Vue) {
   if (install.installed) return;

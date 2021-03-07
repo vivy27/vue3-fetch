@@ -6,6 +6,10 @@ vue3-fetch component uses the browser's native promised based fetch api. Making 
 ## Installation
 ```
 npm i vue3-fetch --save
+
+or
+
+yarn add vue3-fetch
 ```
 
 Install the plugin globally.
@@ -113,6 +117,93 @@ export default {
 </script>
 ```
 
+## Form Usage
+
+```html
+<template>
+  <vue3-fetch
+    ref="postref"
+    fetchId="post-user"
+    method="post"
+    url="https://vj-simple-crud.herokuapp.com/user"
+    @fetch-success="onSuccess"
+    @fetch-error="onError"
+  >
+    <template #default>
+      <form @submit="onSubmit">
+        <p>
+          <label for="name">Name</label>
+          <input
+            id="name"
+            v-model="payload.name"
+            type="text"
+            name="name"
+            required
+          />
+        </p>
+        <p>
+          <label for="department">Department</label>
+          <input
+            id="department"
+            v-model="payload.department"
+            type="text"
+            name="department"
+            required
+          />
+        </p>
+        <p>
+          <label for="phone">Phone</label>
+          <input
+            id="phone"
+            v-model="payload.phone"
+            type="phone"
+            name="phone"
+            required
+          />
+        </p>
+        <p>
+          <input type="submit" value="Submit" />
+        </p>
+      </form>
+    </template>
+  </vue3-fetch>
+</template>
+<script>
+import { ref, reactive } from "vue";
+export default {
+  name: "form-post",
+  setup() {
+    const postref = ref(null);
+    const payload = reactive({
+      name: null,
+      department: null,
+      phone: null,
+    });
+    const onSubmit = (e) => {
+      e.preventDefault();
+      postref.value.execute({ body: payload });
+    };
+
+    const onSuccess = () => {
+      console.log("Form posted successfully");
+    };
+
+    const onError = (e) => {
+      console.log("Form post failed!", e);
+    };
+
+    return {
+      postref,
+      payload,
+      onSubmit,
+      onSuccess,
+      onError,
+    };
+  },
+};
+</script>
+```
+
 ### Props
 
 ```js
@@ -132,15 +223,17 @@ props: {
       default: "get"
     },
 
-    // fetch header eg. { 'Content-Type': 'application/json' }
-    headers: Object
+    // fetch url query params eg. {'username':'John', 'password': 'doe'}
+    query: Object,
 
     // fetch request body eg. {'username':'John', 'password': 'doe'}
-    // body data type must match "Content-Type" header
-    payload: Object
+    body: Object,
+
+    // fetch header default. { 'Content-Type': 'application/json' }
+    headers: Object,
 
     // fetch referrer
-    referrer: String
+    referrer: String,
 
     // fetch referrerPolicy
     referrerPolicy: {

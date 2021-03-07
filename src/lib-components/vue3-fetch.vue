@@ -1,11 +1,19 @@
 <template>
-  <div :id="fetchId" class="vue-fetch" :class="{'is-stubbed': !!stub}">
-    <slot v-bind="{ isLoading, isSuccess, isError, data, error }" />
+  <div :id="fetchId" class="vue-fetch" :class="{ 'is-stubbed': !!stub }">
+    <slot
+      v-bind="{
+        isLoading,
+        isSuccess,
+        isError,
+        data: response.data,
+        error: response.error,
+      }"
+    />
   </div>
 </template>
 
 <script>
-import { computed, watch } from "vue";
+import { watch } from "vue";
 import useFetch from "../hooks/useFetch";
 
 export default {
@@ -16,17 +24,26 @@ export default {
       type: String,
       required: true,
     },
-    params: {
-      type: Object,
-      default: () => {},
-    },
     method: {
       type: String,
       validator: (value) => ["get", "post", "put", "delete"].includes(value),
       default: "get",
     },
-    headers: Object,
-    payload: Object,
+    query: {
+      type: Object,
+      default() {
+        return {};
+      },
+    },
+    body: {
+      type: [Object, Array],
+    },
+    headers: {
+      type: Object,
+      default() {
+        return { "Content-Type": "application/json" };
+      },
+    },
     referrer: String,
     referrerPolicy: {
       type: String,
@@ -71,67 +88,31 @@ export default {
     signal: [String, Number, Boolean, Array, Object, Function, Promise],
     stub: [Array, Object],
   },
-  setup(
-    {
-      fetchId,
-      url,
-      params,
-      method,
-      headers,
-      payload,
-      referrer,
-      referrerPolicy,
-      mode,
-      credentials,
-      cache,
-      redirect,
-      integrity,
-      keepAlive,
-      signal,
-      stub,
-    },
-    { emit }
-  ) {
+  setup(props, { emit }) {
     const fetchOptions = {
-      method,
-      ...(headers && { headers }),
-      ...(payload && { body: payload }),
-      ...(referrer && { referrer }),
-      ...(referrerPolicy && { referrerPolicy }),
-      ...(mode && { mode }),
-      ...(credentials && { credentials }),
-      ...(cache && { cache }),
-      ...(redirect && { redirect }),
-      ...(integrity && { integrity }),
-      ...(keepAlive && { keepAlive }),
-      ...(signal && { signal }),
+      ...props,
     };
-    const qs =
-      params &&
-      Object.keys(params)
-        .map((key) => key + "=" + params[key])
-        .join("&");
-    const endpoint = params ? `${url}?${qs}` : url;
-    const { isLoading, isSuccess, isError, data, error, execute } = useFetch(
-      endpoint,
-      fetchOptions,
-      stub
+    const { isLoading, isSuccess, isError, response, execute } = useFetch(
+      fetchOptions
     );
-    const moduleName = computed(() => fetchId || url.toString().replace(/\//g, "-"));
 
-    watch([data, error], ([_isSuccess, _isError]) => {
-      _isSuccess && emit("fetch-success");
-      _isError && emit("fetch-error");
+    watch([isSuccess, isError], ([success, error]) => {
+      if (success) emit("fetch-success", response.data);
+      if (error) emit("fetch-error", response.error);
     });
 
-    watch(() => fetchOptions, execute);
+    watch(
+      () => [props.query, props.body],
+      ([query, body]) => {
+        execute({ ...(query && { query }), ...(body && { body }) });
+      }
+    );
 
     return {
       isLoading,
       isSuccess,
       isError,
-      data,
-      error,
+      response,
       execute,
     };
   },
@@ -139,27 +120,27 @@ export default {
 </script>
 <style>
 .vue-fetch.is-stubbed {
-	position: relative;
-	border: 2px dashed orange;
-	padding: 2px;
+  position: relative;
+  border: 2px dashed orange;
+  padding: 2px;
 }
- .vue-fetch.is-stubbed::after {
-	content: "Stub";
-	position: absolute;
-	left: 50%;
-	transform: translateX(-50%);
-	top: -15px;
-	background: orange;
-	color: white;
-	padding: 5px;
-	border-radius: 5px;
+.vue-fetch.is-stubbed::after {
+  content: "Stub";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: -15px;
+  background: orange;
+  color: white;
+  padding: 5px;
+  border-radius: 5px;
 }
- .vue-fetch .vue-fetch.is-stubbed {
-	border: 0;
-	padding: 0;
+.vue-fetch .vue-fetch.is-stubbed {
+  border: 0;
+  padding: 0;
 }
- .vue-fetch .vue-fetch::after {
-	display: none;
+.vue-fetch .vue-fetch::after {
+  display: none;
 }
 </style>
 

@@ -1,23 +1,91 @@
-import { ref, onMounted, computed, watch, openBlock, createBlock, renderSlot } from 'vue';
+import { ref, reactive, onMounted, watch, openBlock, createBlock, renderSlot } from 'vue';
 
-function useFetch(url, options, stub = {}) {
+function useFetch({
+  url,
+  method,
+  query,
+  body,
+  headers,
+  referrer,
+  referrerPolicy,
+  mode,
+  credentials,
+  cache,
+  redirect,
+  integrity,
+  keepAlive,
+  signal,
+  stub
+}) {
   const isLoading = ref(false);
   const isSuccess = ref(false);
   const isError = ref(false);
-  const data = ref(null);
-  const error = ref(null);
+  const response = reactive({
+    data: null,
+    error: null
+  });
 
-  const stubExits = () => Object.keys(stub).length > 0;
+  const endpoint = query => {
+    const qs = new URLSearchParams(query).toString();
+    return qs ? `${url}?${qs}` : url;
+  };
 
-  const execute = async () => {
+  const fetchOptions = {
+    method,
+    ...(body && {
+      body
+    }),
+    ...(headers && {
+      headers
+    }),
+    ...(referrer && {
+      referrer
+    }),
+    ...(referrerPolicy && {
+      referrerPolicy
+    }),
+    ...(mode && {
+      mode
+    }),
+    ...(credentials && {
+      credentials
+    }),
+    ...(cache && {
+      cache
+    }),
+    ...(redirect && {
+      redirect
+    }),
+    ...(integrity && {
+      integrity
+    }),
+    ...(keepAlive && {
+      keepAlive
+    }),
+    ...(signal && {
+      signal
+    })
+  };
+
+  const execute = async ({
+    query,
+    body
+  } = {}) => {
+    isSuccess.value = null;
+    isError.value = null;
     isLoading.value = true;
+    const options = { ...fetchOptions,
+      ...(body && {
+        body: JSON.stringify(body)
+      })
+    };
 
     try {
-      data.value = stubExits() ? stub : await fetch(url, options).then(res => res.json());
+      response.data = stub || (await fetch(endpoint(query), options).then(res => res.json()));
       isSuccess.value = true;
       isError.value = false;
     } catch (e) {
-      error.value = e;
+      response.error = e.message;
       isSuccess.value = false;
       isError.value = true;
     } finally {
@@ -26,16 +94,18 @@ function useFetch(url, options, stub = {}) {
   };
 
   onMounted(() => {
-    if (options.method === 'get') {
-      execute();
+    if (method === 'get') {
+      execute({
+        query,
+        body
+      });
     }
   });
   return {
     isLoading,
     isSuccess,
     isError,
-    data,
-    error,
+    response,
     execute
   };
 }
@@ -48,17 +118,32 @@ var script = {
       type: String,
       required: true
     },
-    params: {
-      type: Object,
-      default: () => {}
-    },
     method: {
       type: String,
       validator: value => ["get", "post", "put", "delete"].includes(value),
       default: "get"
     },
-    headers: Object,
-    payload: Object,
+    query: {
+      type: Object,
+
+      default() {
+        return {};
+      }
+
+    },
+    body: {
+      type: [Object, Array]
+    },
+    headers: {
+      type: Object,
+
+      default() {
+        return {
+          "Content-Type": "application/json"
+        };
+      }
+
+    },
     referrer: String,
     referrerPolicy: {
       type: String,
@@ -86,84 +171,36 @@ var script = {
     stub: [Array, Object]
   },
 
-  setup({
-    fetchId,
-    url,
-    params,
-    method,
-    headers,
-    payload,
-    referrer,
-    referrerPolicy,
-    mode,
-    credentials,
-    cache,
-    redirect,
-    integrity,
-    keepAlive,
-    signal,
-    stub
-  }, {
+  setup(props, {
     emit
   }) {
-    const fetchOptions = {
-      method,
-      ...(headers && {
-        headers
-      }),
-      ...(payload && {
-        body: payload
-      }),
-      ...(referrer && {
-        referrer
-      }),
-      ...(referrerPolicy && {
-        referrerPolicy
-      }),
-      ...(mode && {
-        mode
-      }),
-      ...(credentials && {
-        credentials
-      }),
-      ...(cache && {
-        cache
-      }),
-      ...(redirect && {
-        redirect
-      }),
-      ...(integrity && {
-        integrity
-      }),
-      ...(keepAlive && {
-        keepAlive
-      }),
-      ...(signal && {
-        signal
-      })
+    const fetchOptions = { ...props
     };
-    const qs = params && Object.keys(params).map(key => key + "=" + params[key]).join("&");
-    const endpoint = params ? `${url}?${qs}` : url;
     const {
       isLoading,
       isSuccess,
       isError,
-      data,
-      error,
+      response,
       execute
-    } = useFetch(endpoint, fetchOptions, stub);
-    const moduleName = computed(() => fetchId || url.toString().replace(/\//g, "-"));
-    watch([data, error], ([_isSuccess, _isError]) => {
-      _isSuccess && emit("fetch-success");
-      _isError && emit("fetch-error");
+    } = useFetch(fetchOptions);
+    watch([isSuccess, isError], ([success, error]) => {
+      if (success) emit("fetch-success", response.data);
+      if (error) emit("fetch-error", response.error);
     });
-    watch(() => fetchOptions, execute);
+    watch(() => [props.query, props.body], ([query, body]) => {
+      execute({ ...(query && {
+          query
+        }),
+        ...(body && {
+          body
+        })
+      });
+    });
     return {
       isLoading,
       isSuccess,
       isError,
-      data,
-      error,
+      response,
       execute
     };
   }
@@ -173,9 +210,15 @@ var script = {
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (openBlock(), createBlock("div", {
     id: $props.fetchId,
-    class: ["vue-fetch", {'is-stubbed': !!$props.stub}]
+    class: ["vue-fetch", { 'is-stubbed': !!$props.stub }]
   }, [
-    renderSlot(_ctx.$slots, "default", { isLoading: $setup.isLoading, isSuccess: $setup.isSuccess, isError: $setup.isError, data: $setup.data, error: $setup.error })
+    renderSlot(_ctx.$slots, "default", {
+        isLoading: $setup.isLoading,
+        isSuccess: $setup.isSuccess,
+        isError: $setup.isError,
+        data: $setup.response.data,
+        error: $setup.response.error,
+      })
   ], 10, ["id"]))
 }
 
