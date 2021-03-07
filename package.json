@@ -1,8 +1,9 @@
 {
   "name": "vue3-fetch",
-  "version": "2.0.4",
+  "version": "2.1.0",
   "description": "A vue3 fetch component for xhr requests",
   "author": "Vivian Joseph<vivy27@gmail.com>",
+  "license": "ISC",
   "main": "dist/vue3-fetch.ssr.js",
   "browser": "dist/vue3-fetch.esm.js",
   "module": "dist/vue3-fetch.esm.js",
