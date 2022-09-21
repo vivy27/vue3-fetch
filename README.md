@@ -18,7 +18,7 @@ Install the plugin globally.
 //main.js
 import { createApp } from 'vue'
 import App from './App.vue'
-import Vue3Fetch from 'vue3-fetch'
+import { Vue3Fetch } from 'vue3-fetch'
 import 'vue3-fetch/dist/style.css'
 
 const app = createApp(App)
@@ -30,7 +30,7 @@ Or import the component locally inside a component.
 
 ```js
 //App.vue
-import Vue3Fetch from 'vue3-fetch'
+import { Vue3Fetch } from 'vue3-fetch'
 import 'vue3-fetch/dist/style.css'
 ```
 

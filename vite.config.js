@@ -7,7 +7,9 @@ export default defineConfig({
   build: {
     lib: {
       entry: path.resolve(__dirname, 'src/index.js'),
-      name: 'vue3-fetch'
+      name: 'vue3-fetch',
+      fileName: (format) => `vue3-fetch.${format}.js`,
+      formats: ['cjs', 'es', 'umd'],
     },
     rollupOptions: {
       external: ['vue'],

@@ -1,0 +1,1 @@
+export { default as Vue3Fetch } from './Vue3Fetch.vue';

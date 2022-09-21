@@ -1,22 +1,29 @@
 {
   "name": "vue3-fetch",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "A vue3 fetch component for xhr requests",
   "author": "Vivian Joseph<vivy27@gmail.com>",
-  "license": "MIT",
   "type": "module",
-  "main": "./dist/vue3-fetch.umd.cjs",
-  "module": "./dist/vue3-fetch.js",
+  "main": "./dist/vue3-fetch.umd.js",
+  "module": "./dist/vue3-fetch.es.js",
   "exports": {
     ".": {
-      "import": "./dist/vue3-fetch.js",
-      "require": "./dist/vue3-fetch.umd.cjs"
+      "import": "./dist/vue3-fetch.es.js",
+      "require": "./dist/vue3-fetch.umd.js"
     },
     "./dist/style.css": "./dist/style.css"
   },
   "files": [
     "dist"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vivy27/vue3-fetch.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vivy27/vue3-fetch/issues"
+  },
   "keywords": [
     "vue",
     "fetch",
