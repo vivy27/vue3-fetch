@@ -1,7 +1,7 @@
 # vue3-fetch
 vue3-fetch component uses the browser's native promised based fetch api. Making network requests to server have become easy now through template. This component gives only the json responses.
 
-> This fetch component is based on Vue3.
+> This fetch component is based on Vue3 and bundled with Vite.
 
 ## Installation
 ```
@@ -18,26 +18,20 @@ Install the plugin globally.
 //main.js
 import { createApp } from 'vue'
 import App from './App.vue'
-import { Vue3Fetch } from 'vue3-fetch'
-import 'vue3-fetch/dist/vue3-fetch.css'
+import Vue3Fetch from 'vue3-fetch'
+import 'vue3-fetch/dist/style.css'
 
 const app = createApp(App)
 app.component('vue3-fetch', Vue3Fetch)
 app.mount('#app')
 ```
 
-Or import the component locally.
+Or import the component locally inside a component.
 
 ```js
 //App.vue
-import { Vue3Fetch } from 'vue3-fetch'
-import 'vue3-fetch/dist/vue3-fetch.css'
-
-export default {
-  components: {
-    Vue3Fetch
-  }
-}
+import Vue3Fetch from 'vue3-fetch'
+import 'vue3-fetch/dist/style.css'
 ```
 
 ## Basic Usage
@@ -65,54 +59,37 @@ export default {
 
 ```html
 <template>
-  <vue3-fetch
-      ref="fetchref"
-      fetchId="get-users"
-      url="https://vj-simple-crud.herokuapp.com/users"
-      @fetch-success="onSuccess" 
-      @fetch-error="onError"
-    >
-        <template #default="{ isLoading, data, error }">
-            <div v-if="isLoading">Loading...</div>
-            <div v-else v-for="(user, index) in data" :key="`user-${index}`">
-            <div>{{ user.name }}</div>
-            <div>{{ user.department }}</div>
-            <div>{{ user.phone }}</div>
-            </div>
-        </template>
-        <section>
-          <button @click="refetch">Re-fetch</button>
-        </section>
-    </vue3-fetch>
+  <vue3-fetch ref="fetchref" fetchId="get-users" url="https://vj-simple-crud.herokuapp.com/users"
+    @fetch-success="onSuccess" @fetch-error="onError">
+    <template #default="{ isLoading, data, error }">
+      <div v-if="isLoading">Loading...</div>
+      <div v-else v-for="(user, index) in data" :key="`user-${index}`">
+        <div>{{ user.name }}</div>
+        <div>{{ user.department }}</div>
+        <div>{{ user.phone }}</div>
+      </div>
+    </template>
+  </vue3-fetch>
+  <section>
+    <button @click="refetch">Re-fetch</button>
+  </section>
 </template>
 
-<script>
+<script setup>
 import { ref } from 'vue';
 
-export default {
-  name: "App",
-  setup() {
-    const fetchref = ref(null);
+const fetchref = ref(null);
 
-    const onSuccess = () => {
-      console.log(":::Fetch success:::");
-    };
+const onSuccess = () => {
+  console.log(":::Fetch success:::");
+};
 
-    const onError = () => {
-      console.log(":::Fetch error:::");
-    };
+const onError = () => {
+  console.log(":::Fetch error:::");
+};
 
-    const refetch = () => {
-      fetchref.value.execute();
-    };
-
-    return {
-      onSuccess,
-      onError,
-      fetchref,
-      refetch,
-    };
-  },
+const refetch = () => {
+  fetchref.value.execute();
 };
 </script>
 ```
@@ -121,45 +98,21 @@ export default {
 
 ```html
 <template>
-  <vue3-fetch
-    ref="postref"
-    fetchId="post-user"
-    method="post"
-    url="https://vj-simple-crud.herokuapp.com/user"
-    @fetch-success="onSuccess"
-    @fetch-error="onError"
-  >
+  <vue3-fetch ref="postref" fetchId="post-user" method="post" url="https://vj-simple-crud.herokuapp.com/user"
+    @fetch-success="onSuccess" @fetch-error="onError">
     <template #default>
       <form @submit="onSubmit">
         <p>
           <label for="name">Name</label>
-          <input
-            id="name"
-            v-model="payload.name"
-            type="text"
-            name="name"
-            required
-          />
+          <input id="name" v-model="payload.name" type="text" name="name" required />
         </p>
         <p>
           <label for="department">Department</label>
-          <input
-            id="department"
-            v-model="payload.department"
-            type="text"
-            name="department"
-            required
-          />
+          <input id="department" v-model="payload.department" type="text" name="department" required />
         </p>
         <p>
           <label for="phone">Phone</label>
-          <input
-            id="phone"
-            v-model="payload.phone"
-            type="phone"
-            name="phone"
-            required
-          />
+          <input id="phone" v-model="payload.phone" type="phone" name="phone" required />
         </p>
         <p>
           <input type="submit" value="Submit" />
@@ -168,38 +121,26 @@ export default {
     </template>
   </vue3-fetch>
 </template>
-<script>
+<script setup>
 import { ref, reactive } from "vue";
-export default {
-  name: "form-post",
-  setup() {
-    const postref = ref(null);
-    const payload = reactive({
-      name: null,
-      department: null,
-      phone: null,
-    });
-    const onSubmit = (e) => {
-      e.preventDefault();
-      postref.value.execute({ body: payload });
-    };
 
-    const onSuccess = () => {
-      console.log("Form posted successfully");
-    };
+const postref = ref(null);
+const payload = reactive({
+  name: null,
+  department: null,
+  phone: null,
+});
+const onSubmit = (e) => {
+  e.preventDefault();
+  postref.value.execute({ body: payload });
+};
 
-    const onError = (e) => {
-      console.log("Form post failed!", e);
-    };
+const onSuccess = () => {
+  console.log("Form posted successfully");
+};
 
-    return {
-      postref,
-      payload,
-      onSubmit,
-      onSuccess,
-      onError,
-    };
-  },
+const onError = (e) => {
+  console.log("Form post failed!", e);
 };
 </script>
 ```
@@ -279,21 +220,13 @@ props: {
 ```html
 <vue3-fetch url="https://vj-simple-crud.herokuapp.com/users" @fetch-success="onSuccess" @fetch-error="onError" />
 ...
-setup() {
+const onSuccess = () => {
+  console.log(":::Fetch success:::");
+};
 
-  const onSuccess = () => {
-    console.log(":::Fetch success:::");
-  };
-
-  const onError = () => {
-    console.log(":::Fetch error:::");
-  };
-
-  return {
-    onSuccess,
-    onError
-  };
-}
+const onError = () => {
+  console.log(":::Fetch error:::");
+};
 ...
 ```
 
