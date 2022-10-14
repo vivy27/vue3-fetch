@@ -1,38 +1,27 @@
+name: Create release
+
 on:
   push:
     tags:
       - "v*"
-
-name: Create release
 
 jobs:
   publish:
     name: Publish to npm
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout the repo
         uses: actions/checkout@v3
-
-      - name: Read .nvmrc
-        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
-        id: nvm
-
-      - name: Use Node version from .nvmrc
         uses: actions/setup-node@v3
-        with:
-          node-version: ${{ steps.nvm.outputs.NVMRC }}
+        with: 
+          node-version: 16
+      - name: Publish
+        run: |
+          npm config set //registry.npmjs.org/:_authToken ${{ NPM_TOKEN }}
+          npm ci
+          npm publish
+        env:
+         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Write .npmrc so it can login to npmjs
-        run: npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build the package
-        run: npm run build
-
-      - name: Publish to npm registry
-        run: npm publish --access restricted
 
   create-github-release:
     name: Create Github release
@@ -46,7 +35,7 @@ jobs:
       - uses: actions/github-script@v6
         run: 'echo "RELEASE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV'
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{GITHUB_TOKEN}}
           script: |
             if(!process.env.RELEASE_TAG){
               core.setFailed("The environment variable RELEASE_TAG is not defined.");
@@ -68,3 +57,5 @@ jobs:
             } catch (error) {
               core.setFailed(error.message);
             }
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}

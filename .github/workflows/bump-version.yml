@@ -33,6 +33,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Setup Git
+        run: |
+          git config user.name 'Vivian Joseph'
+          git config user.email 'vivy27@gmail.com'
+
       - name: Bump version
         run: npm version ${{ github.event.inputs.version }}
 
