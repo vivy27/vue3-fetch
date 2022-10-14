@@ -10,9 +10,9 @@ jobs:
     name: Publish to npm
     runs-on: ubuntu-latest
     steps:
-        uses: actions/checkout@v3
-        uses: actions/setup-node@v3
-        with: 
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
           node-version: 16
       - name: Publish
         run: |
@@ -20,8 +20,7 @@ jobs:
           npm ci
           npm publish
         env:
-         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   create-github-release:
     name: Create Github release
@@ -35,7 +34,7 @@ jobs:
       - uses: actions/github-script@v6
         run: 'echo "RELEASE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV'
         with:
-          github-token: ${{GITHUB_TOKEN}}
+          github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             if(!process.env.RELEASE_TAG){
               core.setFailed("The environment variable RELEASE_TAG is not defined.");
@@ -57,5 +56,3 @@ jobs:
             } catch (error) {
               core.setFailed(error.message);
             }
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
