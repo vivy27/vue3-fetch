@@ -15,13 +15,14 @@ on:
 jobs:
   bump-version:
     runs-on: ubuntu-latest
+    env:
+      DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+      VERSION: ${{ github.event.inputs.version }}
     steps:
       - name: Checkout the repo
         uses: actions/checkout@v3
         with:
           ssh-key: ${{ DEPLOY_KEY }}
-        env:
-          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
 
       - name: Setup Node.js 16
         uses: actions/setup-node@v3
@@ -38,8 +39,6 @@ jobs:
 
       - name: Bump version
         run: npm version ${{ VERSION }}
-        env:
-          VERSION: ${{ github.event.inputs.version }}
 
       - name: Push latest version
         run: git push origin master --follow-tags
