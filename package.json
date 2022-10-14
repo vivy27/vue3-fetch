@@ -1,6 +1,6 @@
 {
   "name": "vue3-fetch",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "A vue3 fetch component for xhr requests",
   "author": "Vivian Joseph<vivy27@gmail.com>",
   "type": "module",
