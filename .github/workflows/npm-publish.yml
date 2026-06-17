@@ -5,21 +5,28 @@ on:
     workflows: ["Bump version"]
     types:
       - completed
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
   publish-npm:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repo
-        uses: actions/checkout@v3
-        with:
-          ssh-key: ${{ secrets.DEPLOY_KEY }}
+        uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 22
           registry-url: https://registry.npmjs.org/
+
+      - name: Ensure npm CLI supports OIDC trusted publishing
+        run: npm install -g npm@latest
 
       - name: Install dependencies and build 🔧
         run: npm ci
@@ -27,5 +34,4 @@ jobs:
       - name: Publish package on NPM 📦
         run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
           NODE_OPTIONS: --max-old-space-size=6144
