@@ -2,10 +2,10 @@ import { ref, reactive, onMounted } from "vue";
 
 export default function useFetch({
     url,
-    method,
+    method = "get",
     query,
     body,
-    headers,
+    headers = { "Content-Type": "application/json" },
     referrer,
     referrerPolicy,
     mode,
