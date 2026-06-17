@@ -19,6 +19,7 @@
     "type": "git",
     "url": "git+https://github.com/vivy27/vue3-fetch.git"
   },
+  "homepage": "https://vivy27.github.io/vue3-fetch/",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/vivy27/vue3-fetch/issues"
