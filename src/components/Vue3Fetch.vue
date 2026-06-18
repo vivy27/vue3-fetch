@@ -1,17 +1,19 @@
 <template>
   <div :id="fetchId" class="vue-fetch" :class="{ 'is-stubbed': !!stub }">
-    <slot v-bind="{
-      isLoading,
-      isSuccess,
-      isError,
-      data: response.data,
-      error: response.error,
-    }" />
+    <slot v-if="isLoading" name="loading">
+      <slot v-bind="defaultSlotProps" />
+    </slot>
+    <slot v-else-if="isError" name="error" v-bind="{ error: response.error }">
+      <slot v-bind="defaultSlotProps" />
+    </slot>
+    <slot v-else name="data" v-bind="{ data: response.data }">
+      <slot v-bind="defaultSlotProps" />
+    </slot>
   </div>
 </template>
-  
+
 <script setup>
-import { watch } from "vue";
+import { computed, watch } from "vue";
 import useFetch from "../hooks/useFetch";
 
 const props = defineProps({
@@ -90,6 +92,14 @@ const emit = defineEmits(['fetch-success', 'fetch-error']);
 const { isLoading, isSuccess, isError, response, execute } = useFetch(
   props
 );
+
+const defaultSlotProps = computed(() => ({
+  isLoading: isLoading.value,
+  isSuccess: isSuccess.value,
+  isError: isError.value,
+  data: response.data,
+  error: response.error,
+}));
 
 watch([isSuccess, isError], ([success, error]) => {
   if (success) emit("fetch-success", response.data);

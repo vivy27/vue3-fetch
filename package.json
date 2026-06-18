@@ -42,7 +42,9 @@
     "prepack": "vite build",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "test": "vitest run",
+    "test:smoke": "RUN_SMOKE_TESTS=1 vitest run src/hooks/useFetch.smoke.test.js"
   },
   "dependencies": {
     "vue": "^3.2.37"
@@ -52,8 +54,11 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.7",
+    "@vue/test-utils": "^2.4.11",
+    "jsdom": "^29.1.1",
     "vite": "^8.0.16",
     "vite-plugin-css-injected-by-js": "^5.0.1",
-    "vitepress": "^1.6.4"
+    "vitepress": "^1.6.4",
+    "vitest": "^4.1.9"
   }
 }

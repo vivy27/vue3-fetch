@@ -34,6 +34,8 @@ import { Vue3Fetch } from 'vue3-fetch'
 
 ## Basic Usage
 
+This is the original `#default` scoped slot. It receives all the slot props together, and you branch on `isLoading`/`isError` yourself. If you've used this component before, this pattern is unchanged and keeps working exactly as is.
+
 ```html
 <template>
   <vue3-fetch
@@ -52,6 +54,32 @@ import { Vue3Fetch } from 'vue3-fetch'
     </vue3-fetch>
 </template>
 ```
+
+## Named Slots
+
+As an alternative to branching on `isLoading`/`isError` inside a single `#default` slot, you can use the `#loading`, `#error`, and `#data` named slots instead. vue3-fetch shows whichever one matches the current state:
+
+```html
+<template>
+  <vue3-fetch fetchId="get-users" url="https://vj-simple-crud.herokuapp.com/users">
+    <template #loading>
+      <div>Loading...</div>
+    </template>
+    <template #error="{ error }">
+      <div>Something went wrong: {{ error }}</div>
+    </template>
+    <template #data="{ data }">
+      <div v-for="(user, index) in data" :key="`user-${index}`">
+        <div>{{ user.name }}</div>
+        <div>{{ user.department }}</div>
+        <div>{{ user.phone }}</div>
+      </div>
+    </template>
+  </vue3-fetch>
+</template>
+```
+
+You don't have to provide all three — any named slot you omit falls back to the `#default` slot for that state, so the two patterns can be mixed.
 
 ## Advanced Usage
 
@@ -235,6 +263,29 @@ props: {
     
     // mock fetch response with an object
     stub: Object
+}
+```
+
+### Slot Props
+
+The default slot (and the object returned by `useFetch()`) exposes this reactive state:
+
+```js
+{
+    // true while a request is in flight
+    isLoading: Boolean,
+
+    // true once a request resolves successfully, null beforehand
+    isSuccess: Boolean,
+
+    // true once a request fails, null beforehand
+    isError: Boolean,
+
+    // parsed JSON response, or the stub value
+    data: Object,
+
+    // the error message, when isError is true
+    error: String
 }
 ```
 

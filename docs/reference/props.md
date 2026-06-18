@@ -69,3 +69,26 @@ props: {
     stub: Object
 }
 ```
+
+## Slot Props
+
+The default slot (and the object returned by `useFetch()`) exposes this reactive state:
+
+```js
+{
+    // true while a request is in flight
+    isLoading: Boolean,
+
+    // true once a request resolves successfully, null beforehand
+    isSuccess: Boolean,
+
+    // true once a request fails, null beforehand
+    isError: Boolean,
+
+    // parsed JSON response, or the stub value
+    data: Object,
+
+    // the error message, when isError is true
+    error: String
+}
+```

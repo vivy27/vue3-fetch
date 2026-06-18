@@ -21,5 +21,8 @@ export default defineConfig({
       }
     }
   },
-  plugins: [vue(), cssInjectedByJsPlugin()]
+  plugins: [vue(), cssInjectedByJsPlugin()],
+  test: {
+    environment: 'jsdom',
+  },
 })
